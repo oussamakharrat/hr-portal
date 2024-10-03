@@ -1,5 +1,3 @@
-// src/context/AppContext.jsx
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 
@@ -26,6 +24,16 @@ export const AppProvider = ({ children }) => {
         }
     });
 
+    const [recentActivities, setRecentActivities] = useState(() => {
+        try {
+            const savedActivities = localStorage.getItem('recentActivities');
+            return savedActivities ? JSON.parse(savedActivities) : [];
+        } catch (error) {
+            console.error("Failed to parse recentActivities from localStorage", error);
+            return [];
+        }
+    });
+
     useEffect(() => {
         localStorage.setItem('employees', JSON.stringify(employees));
     }, [employees]);
@@ -34,18 +42,24 @@ export const AppProvider = ({ children }) => {
         localStorage.setItem('leaveRequests', JSON.stringify(leaveRequests));
     }, [leaveRequests]);
 
+    useEffect(() => {
+        localStorage.setItem('recentActivities', JSON.stringify(recentActivities));
+    }, [recentActivities]);
+
     const addEmployee = (employee) => {
-        setEmployees((prevEmployees) => [
-            ...prevEmployees,
-            { id: uuidv4(), ...employee },
-        ]);
+        const newEmployee = { id: uuidv4(), ...employee };
+        setEmployees((prevEmployees) => [...prevEmployees, newEmployee]);
+
+        // Add to recent activities
+        addRecentActivity(`${employee.name}`, 'added employee');
     };
 
     const addLeaveRequest = (request) => {
-        setLeaveRequests((prevRequests) => [
-            ...prevRequests,
-            { id: uuidv4(), ...request },
-        ]);
+        const newRequest = { id: uuidv4(), ...request };
+        setLeaveRequests((prevRequests) => [...prevRequests, newRequest]);
+
+        // Add to recent activities
+        addRecentActivity(`${request.employee}`, 'requested leave');
     };
 
     const approveLeaveRequest = (id) => {
@@ -54,6 +68,10 @@ export const AppProvider = ({ children }) => {
                 request.id === id ? { ...request, status: 'Approved' } : request
             )
         );
+
+        // Add to recent activities
+        const approvedRequest = leaveRequests.find(req => req.id === id);
+        addRecentActivity(`${approvedRequest.employee}`, 'leave approved');
     };
 
     const rejectLeaveRequest = (id) => {
@@ -62,10 +80,31 @@ export const AppProvider = ({ children }) => {
                 request.id === id ? { ...request, status: 'Rejected' } : request
             )
         );
+
+        // Add to recent activities
+        const rejectedRequest = leaveRequests.find(req => req.id === id);
+        addRecentActivity(`${rejectedRequest.employee}`, 'leave rejected');
+    };
+
+    const addRecentActivity = (action, type) => {
+        const newActivity = {
+            action,
+            type,
+            date: new Date().toISOString().split('T')[0] // format date as YYYY-MM-DD
+        };
+        setRecentActivities((prevActivities) => [newActivity, ...prevActivities].slice(0, 10)); // Keep only the 10 most recent activities
     };
 
     return (
-        <AppContext.Provider value={{ employees, addEmployee, leaveRequests, addLeaveRequest, approveLeaveRequest, rejectLeaveRequest }}>
+        <AppContext.Provider value={{
+            employees,
+            addEmployee,
+            leaveRequests,
+            addLeaveRequest,
+            approveLeaveRequest,
+            rejectLeaveRequest,
+            recentActivities
+        }}>
             {children}
         </AppContext.Provider>
     );

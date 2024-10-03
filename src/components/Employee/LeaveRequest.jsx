@@ -1,90 +1,67 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { useAppContext } from '../../context/AppContext'; // Import the context
+import { useAuth } from '../../context/AuthContext'; // Import the auth context
+import { FaCheck, FaTimes } from 'react-icons/fa'; // Importing icons for approve/reject actions
+import 'bootstrap/dist/css/bootstrap.min.css';
 
 const LeaveRequest = () => {
-    const { leaveRequests, addLeaveRequest, approveLeaveRequest, rejectLeaveRequest } = useAppContext(); // Destructure context values
-    const [newRequest, setNewRequest] = useState({
-        employee: '',
-        date: '',
-        reason: ''
-    });
-
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setNewRequest({ ...newRequest, [name]: value });
-    };
-
-    const handleRequestSubmit = (e) => {
-        e.preventDefault();
-        addLeaveRequest({
-            ...newRequest,
-            status: 'Pending' // Set the initial status as 'Pending'
-        });
-        setNewRequest({ employee: '', date: '', reason: '' }); // Clear the form
-    };
+    const { leaveRequests, approveLeaveRequest, rejectLeaveRequest } = useAppContext(); // Destructure context values
+    const { role } = useAuth(); // Get the role from Auth context
 
     return (
         <div className="container mt-4">
             <h2 className="mb-4">Leave Requests</h2>
 
-            <div className="mb-4">
-                <h3>Submit New Leave Request</h3>
-                <form onSubmit={handleRequestSubmit} className="mt-3">
-                    <div className="mb-3">
-                        <input
-                            type="text"
-                            name="employee"
-                            value={newRequest.employee}
-                            onChange={handleInputChange}
-                            className="form-control"
-                            placeholder="Employee Name"
-                            required
-                        />
-                    </div>
-                    <div className="mb-3">
-                        <input
-                            type="date"
-                            name="date"
-                            value={newRequest.date}
-                            onChange={handleInputChange}
-                            className="form-control"
-                            required
-                        />
-                    </div>
-                    <div className="mb-3">
-                        <input
-                            type="text"
-                            name="reason"
-                            value={newRequest.reason}
-                            onChange={handleInputChange}
-                            className="form-control"
-                            placeholder="Reason for Leave"
-                            required
-                        />
-                    </div>
-                    <button type="submit" className="btn btn-primary">Submit Leave Request</button>
-                </form>
-            </div>
-
+            {/* Existing Leave Requests */}
             <h3 className="mb-4">Existing Leave Requests</h3>
-            <ul className="list-group">
-                {leaveRequests.map((request) => (
-                    <li key={request.id} className="list-group-item d-flex justify-content-between align-items-center">
-                        <div>
-                            <strong>Employee:</strong> {request.employee} <br />
-                            <strong>Date:</strong> {request.date} <br />
-                            <strong>Reason:</strong> {request.reason} <br />
-                            <strong>Status:</strong> {request.status}
-                        </div>
-                        {request.status === 'Pending' && (
-                            <div>
-                                <button className="btn btn-success btn-sm me-2" onClick={() => approveLeaveRequest(request.id)}>Approve</button>
-                                <button className="btn btn-danger btn-sm" onClick={() => rejectLeaveRequest(request.id)}>Reject</button>
+            <div className="row">
+                {leaveRequests.length === 0 ? (
+                    <p className="text-muted">No leave requests found.</p>
+                ) : (
+                    leaveRequests.map((request) => (
+                        <div key={request.id} className="col-md-6 mb-4">
+                            <div className="card shadow-sm">
+                                <div className="card-body">
+                                    <h5 className="card-title">
+                                        <strong>Employee:</strong> {request.employee}
+                                    </h5>
+                                    <p className="card-text">
+                                        <strong>Date:</strong> {request.date} <br />
+                                        <strong>Reason:</strong> {request.reason} <br />
+                                        <strong>Status:</strong> 
+                                        <span 
+                                            className={`badge ms-2 ${
+                                                request.status === 'Pending' ? 'bg-warning' :
+                                                request.status === 'Approved' ? 'bg-success' : 'bg-danger'
+                                            }`}
+                                        >
+                                            {request.status}
+                                        </span>
+                                    </p>
+
+                                    {/* Only admins can approve/reject leave requests */}
+                                    {role === 'admin' && request.status === 'Pending' && (
+                                        <div className="d-flex justify-content-end">
+                                            <button
+                                                className="btn btn-success btn-sm me-2 d-flex align-items-center"
+                                                onClick={() => approveLeaveRequest(request.id)}
+                                            >
+                                                <FaCheck className="me-1" /> Approve
+                                            </button>
+                                            <button
+                                                className="btn btn-danger btn-sm d-flex align-items-center"
+                                                onClick={() => rejectLeaveRequest(request.id)}
+                                            >
+                                                <FaTimes className="me-1" /> Reject
+                                            </button>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        )}
-                    </li>
-                ))}
-            </ul>
+                        </div>
+                    ))
+                )}
+            </div>
         </div>
     );
 };

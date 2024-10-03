@@ -1,20 +1,13 @@
-// src/components/Home/Dashboard.jsx
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAppContext } from '../../context/AppContext'; // Import the context
 
 const Dashboard = () => {
     const navigate = useNavigate();
-    const { employees, leaveRequests } = useAppContext();
+    const { employees, leaveRequests, recentActivities } = useAppContext();
 
     const totalEmployees = employees.length;
     const pendingLeaveRequests = leaveRequests.filter(request => request.status === 'Pending').length;
-    const recentActivities = [
-        { action: "John Doe", type: "added", date: "2024-10-01" },
-        { action: "Jane Smith", type: "requested leave", date: "2024-09-29" },
-        { action: "Paul Brown", type: "updated profile", date: "2024-09-28" },
-    ];
 
     const handleViewEmployeeList = () => {
         navigate('/employee-list');
@@ -86,13 +79,19 @@ const Dashboard = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {recentActivities.map((activity, index) => (
-                            <tr key={index}>
-                                <td>{activity.action}</td>
-                                <td>{activity.type}</td>
-                                <td>{activity.date}</td>
+                        {recentActivities.length === 0 ? (
+                            <tr>
+                                <td colSpan="3">No recent activities</td>
                             </tr>
-                        ))}
+                        ) : (
+                            recentActivities.map((activity, index) => (
+                                <tr key={index}>
+                                    <td>{activity.action}</td>
+                                    <td>{activity.type}</td>
+                                    <td>{activity.date}</td>
+                                </tr>
+                            ))
+                        )}
                     </tbody>
                 </table>
             </div>

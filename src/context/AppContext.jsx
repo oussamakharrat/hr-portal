@@ -46,65 +46,87 @@ export const AppProvider = ({ children }) => {
         localStorage.setItem('recentActivities', JSON.stringify(recentActivities));
     }, [recentActivities]);
 
+    // Add Employee
     const addEmployee = (employee) => {
         const newEmployee = { id: uuidv4(), ...employee };
         setEmployees((prevEmployees) => [...prevEmployees, newEmployee]);
-
-        // Add to recent activities
         addRecentActivity(`${employee.name}`, 'added employee');
     };
 
+    // Update Employee
+    const updateEmployee = (id, updatedEmployee) => {
+        setEmployees((prevEmployees) =>
+            prevEmployees.map((employee) =>
+                employee.id === id ? { ...employee, ...updatedEmployee } : employee
+            )
+        );
+        addRecentActivity(`${updatedEmployee.name}`, 'updated employee details');
+    };
+
+    // Delete Employee
+    const deleteEmployee = (id) => {
+        const employeeToDelete = employees.find((employee) => employee.id === id);
+        if (employeeToDelete) {
+            setEmployees((prevEmployees) =>
+                prevEmployees.filter((employee) => employee.id !== id)
+            );
+            addRecentActivity(`${employeeToDelete.name}`, 'deleted employee');
+        }
+    };
+
+    // Add Leave Request
     const addLeaveRequest = (request) => {
         const newRequest = { id: uuidv4(), ...request };
         setLeaveRequests((prevRequests) => [...prevRequests, newRequest]);
-
-        // Add to recent activities
         addRecentActivity(`${request.employee}`, 'requested leave');
     };
 
+    // Approve Leave Request
     const approveLeaveRequest = (id) => {
         setLeaveRequests((prevRequests) =>
             prevRequests.map((request) =>
                 request.id === id ? { ...request, status: 'Approved' } : request
             )
         );
-
-        // Add to recent activities
-        const approvedRequest = leaveRequests.find(req => req.id === id);
+        const approvedRequest = leaveRequests.find((req) => req.id === id);
         addRecentActivity(`${approvedRequest.employee}`, 'leave approved');
     };
 
+    // Reject Leave Request
     const rejectLeaveRequest = (id) => {
         setLeaveRequests((prevRequests) =>
             prevRequests.map((request) =>
                 request.id === id ? { ...request, status: 'Rejected' } : request
             )
         );
-
-        // Add to recent activities
-        const rejectedRequest = leaveRequests.find(req => req.id === id);
+        const rejectedRequest = leaveRequests.find((req) => req.id === id);
         addRecentActivity(`${rejectedRequest.employee}`, 'leave rejected');
     };
 
+    // Add Recent Activity
     const addRecentActivity = (action, type) => {
         const newActivity = {
             action,
             type,
-            date: new Date().toISOString().split('T')[0] // format date as YYYY-MM-DD
+            date: new Date().toISOString().split('T')[0], // format date as YYYY-MM-DD
         };
         setRecentActivities((prevActivities) => [newActivity, ...prevActivities].slice(0, 10)); // Keep only the 10 most recent activities
     };
 
     return (
-        <AppContext.Provider value={{
-            employees,
-            addEmployee,
-            leaveRequests,
-            addLeaveRequest,
-            approveLeaveRequest,
-            rejectLeaveRequest,
-            recentActivities
-        }}>
+        <AppContext.Provider
+            value={{
+                employees,
+                addEmployee,
+                updateEmployee, // Provide updateEmployee function to context
+                deleteEmployee, // Provide deleteEmployee function to context
+                leaveRequests,
+                addLeaveRequest,
+                approveLeaveRequest,
+                rejectLeaveRequest,
+                recentActivities,
+            }}
+        >
             {children}
         </AppContext.Provider>
     );

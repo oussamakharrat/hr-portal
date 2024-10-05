@@ -1,21 +1,42 @@
+// src/components/HR/EmployeeList.jsx
+
 import React from 'react';
-import { useAppContext } from '../../context/AppContext'; // Import the context
+import { Link } from 'react-router-dom';
+import { useAppContext } from '../../context/AppContext';
 
 const EmployeeList = () => {
-    const { employees } = useAppContext(); // Destructure context values
+    const { employees } = useAppContext();
 
     return (
         <div className="container mt-4">
-            <h2 className="mb-4">Employee List</h2>
-            <div className="list-group">
-                {employees.map((employee) => (
-                    <div className="list-group-item" key={employee.id}>
-                        <h5 className="mb-1">{employee.name}</h5>
-                        <p className="mb-1">Email: {employee.email}</p>
-                        <small>Role: {employee.role}</small>
-                    </div>
-                ))}
-            </div>
+            <h1>Employee List</h1>
+            <table className="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Department</th>
+                        <th>Email</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {employees.map((employee) => (
+                        <tr key={employee.id}>
+                            <td>{employee.name}</td>
+                            <td>{employee.department}</td>
+                            <td>{employee.email}</td>
+                            <td>
+                                <Link to={`/modify-employee/${employee.id}`} className="btn btn-warning me-2">
+                                    Modify
+                                </Link>
+                                <Link to={`/delete-employee/${employee.id}`} className="btn btn-danger">
+                                    Delete
+                                </Link>
+                            </td>
+                        </tr>
+                    ))}
+                </tbody>
+            </table>
         </div>
     );
 };

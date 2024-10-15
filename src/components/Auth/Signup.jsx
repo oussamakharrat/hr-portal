@@ -17,8 +17,13 @@ const Signup = () => {
     const handleSignup = (e) => {
         e.preventDefault();
         try {
-            signup(username, password, role); // Call signup with username, password, and role
-            navigate('/'); // Redirect to home or desired page
+            signup(username, password, role);
+            if(role === 'admin'){
+                navigate('/');
+            }else{
+                navigate('/employee-dashboard');
+            } // Call signup with username, password, and role
+             // Redirect to home or desired page
         } catch (err) {
             setError(err.message); // Set error message
         }

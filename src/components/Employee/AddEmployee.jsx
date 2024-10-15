@@ -8,7 +8,8 @@ const AddEmployee = () => {
     const [formData, setFormData] = useState({
         name: '',
         email: '',
-        role: ''
+        role: '',
+        position: '' // Add position field
     });
 
     const handleChange = (e) => {
@@ -56,6 +57,17 @@ const AddEmployee = () => {
                         onChange={handleChange}
                         className="form-control"
                         placeholder="Role"
+                        required
+                    />
+                </div>
+                <div className="mb-3">
+                    <input
+                        type="text"
+                        name="position" // Change name to position
+                        value={formData.position} // Bind to position in state
+                        onChange={handleChange}
+                        className="form-control"
+                        placeholder="Position" // Change placeholder to Position
                         required
                     />
                 </div>

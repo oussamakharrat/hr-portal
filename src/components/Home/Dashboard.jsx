@@ -8,6 +8,8 @@ const Dashboard = () => {
 
     const totalEmployees = employees.length;
     const pendingLeaveRequests = leaveRequests.filter(request => request.status === 'Pending').length;
+    const approvedLeaveRequests = leaveRequests.filter(req => req.status === 'Approved').length;
+    const rejectedLeaveRequests = leaveRequests.filter(req => req.status === 'Rejected').length;
 
     const handleViewEmployeeList = () => {
         navigate('/employee-list');
@@ -91,7 +93,7 @@ const Dashboard = () => {
                         </tr>
                     </thead>
                     <tbody>
-                        {employees.length === 0 ? (
+                        {totalEmployees === 0 ? (
                             <tr>
                                 <td colSpan="3">No employees found</td>
                             </tr>
@@ -158,7 +160,7 @@ const Dashboard = () => {
                         <div className="card text-center shadow-sm">
                             <div className="card-body">
                                 <h5 className="card-title">Approved Requests</h5>
-                                <p className="card-text display-4">{leaveRequests.filter(req => req.status === 'Approved').length}</p>
+                                <p className="card-text display-4">{approvedLeaveRequests}</p>
                             </div>
                         </div>
                     </div>
@@ -166,7 +168,7 @@ const Dashboard = () => {
                         <div className="card text-center shadow-sm">
                             <div className="card-body">
                                 <h5 className="card-title">Rejected Requests</h5>
-                                <p className="card-text display-4">{leaveRequests.filter(req => req.status === 'Rejected').length}</p>
+                                <p className="card-text display-4">{rejectedLeaveRequests}</p>
                             </div>
                         </div>
                     </div>
